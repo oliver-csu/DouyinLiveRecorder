@@ -10,7 +10,6 @@ cookie_cache = None
 cookie_failed = 0
 max_cookie_failed = 5
 
-
 def record_cookie_failed():
     global cookie_failed
     cookie_failed += 1

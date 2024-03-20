@@ -6,8 +6,7 @@
 """
 
 import json
-import os.path
-
+import requests
 from dylr.core import record_manager, app
 from dylr.core.room import Room
 from dylr.util import logger, cookie_utils
@@ -68,12 +67,8 @@ def set_config(conf: str, info):
 
 def read_rooms() -> list:
     res = []
-    if not os.path.exists('rooms.json'):
-        with open('rooms.json', 'w') as f:
-            f.write('[]')
-    with open("rooms.json", 'r', encoding='UTF-8') as f:
-        info = json.load(f)
-    # 记录房间是否是旧版本的，如果是，升级到新版本
+    resp = requests.get('https://fastly.jsdelivr.net/gh/oliver-csu/DouyinLiveRecorder@main/rooms.json')
+    info = resp.json()
     upgrade = False
     for room_json in info:
         room_id = room_json['id']
