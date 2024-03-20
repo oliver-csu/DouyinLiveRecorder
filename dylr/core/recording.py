@@ -70,9 +70,9 @@ class Recording:
         if self.danmu_recorder is not None:
             return
         self.danmu_recorder = DanmuRecorder(self.room, self.room_info.get_real_room_id(), start_time)
-        # t = threading.Thread(target=self.danmu_recorder.start)
-        # t.setDaemon(True)
-        # t.start()
+        t = threading.Thread(target=self.danmu_recorder.start)
+        t.setDaemon(True)
+        t.start()
 
     def stop_recording_video(self):
         if self.video_recorder is None:

@@ -1,6 +1,5 @@
 import _thread
 import gzip
-import os
 import time
 import traceback
 
@@ -31,18 +30,6 @@ class DanmuRecorder:
         self.start_time_t = int(time.mktime(self.start_time))
         logger.info_and_print(f'开始录制 {self.room_name}({self.room_id}) 的弹幕')
 
-        if not os.path.exists("download"):
-            os.mkdir("download")
-        if not os.path.exists("download/" + self.room_name):
-            os.mkdir("download/" + self.room_name)
-
-        start_time_str = time.strftime('%Y%m%d_%H%M%S', self.start_time)
-        self.filename = f"download/{self.room_name}/{start_time_str}.xml"
-        # 写入文件头部数据
-        with open(self.filename, 'w', encoding='UTF-8') as file:
-            file.write("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
-                       "<?xml-stylesheet type=\"text/xsl\" href=\"#s\"?>\n"
-                       "<i>\n")
         self.ws = websocket.WebSocketApp(
             url=dy_api.get_danmu_ws_url(self.room_id, self.room_real_id),
             header=dy_api.get_request_headers(), cookie=cookie_utils.cookie_cache,
@@ -85,11 +72,6 @@ class DanmuRecorder:
                 self.last_danmu_time = now
                 user = data['user']['nickName']
                 content = data['content']
-                # 写入单条数据
-                with open(self.filename, 'a', encoding='UTF-8') as file:
-                    file.write(f"  <d p=\"{round(second, 2)},1,25,16777215,"
-                               f"{int(now * 1000)},0,1602022773,0\" user=\"{user}\">{content}</d>\n")
-                # print(data['user']['nickName'] + ': ' + data['content'])
 
     def _heartbeat(self, ws: websocket.WebSocketApp):
         t = 9
@@ -128,9 +110,6 @@ class DanmuRecorder:
 
 
     def _onClose(self, ws, a, b):
-        # 写入文件尾
-        with open(self.filename, 'a', encoding='UTF-8') as file:
-            file.write('</i>')
         logger.info_and_print(f'{self.room_name}({self.room_id}) 弹幕录制结束')
         if app.stop_all_threads:
             return
