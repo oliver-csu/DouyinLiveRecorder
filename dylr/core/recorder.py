@@ -58,10 +58,6 @@ def start_recording(room, browser=None, filename=None, stream_url=None):
     record_manager.recordings.append(rec)
     plugin.on_live_start(room, filename)
 
-    # GUI
-    if app.win_mode:
-        app.win.set_state(room, '正在录制', color='#0000bb')
-
     def download():
         s = requests.Session()
         s.mount(stream_url, HTTPAdapter(max_retries=3))
@@ -111,10 +107,6 @@ def start_recording(room, browser=None, filename=None, stream_url=None):
                 if '<head><title>404 Not Found</title></head>' in file_info:
                     os.remove(filename)
 
-
-        # GUI
-        if app.win_mode:
-            app.win.set_state(room, '未开播', color='#000000')
 
         # 自动转码
         if config.is_auto_transcode():

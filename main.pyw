@@ -22,4 +22,4 @@ def run_gui():
 
 
 if __name__ == '__main__':
-    main()
+    run_cli()

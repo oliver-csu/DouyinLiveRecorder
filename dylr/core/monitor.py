@@ -146,11 +146,7 @@ def rooms_without_web_rid_thread():
             nickname, web_rid = dy_api.get_user_info(room.user_sec_id)
             if web_rid is not None:
                 logger.info(f'发现主播{nickname}开播，获取webrid: {web_rid}')
-                if app.win_mode:
-                    app.win.remove_room(room.room_id)
                 room.room_id = web_rid
-                if app.win_mode:
-                    app.win.add_room(room)
                 config.save_rooms()
             threading.Thread(target=check_room, args=(room,)).start()
             time.sleep(config.get_check_period())

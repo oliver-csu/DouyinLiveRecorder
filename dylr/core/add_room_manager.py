@@ -78,9 +78,6 @@ def find_by_web_rid(web_rid):
     config.save_rooms()
 
     logger.info_and_print(f'成功获取到房间{name}({web_rid})')
-    if app.win_mode:
-        app.win.add_room(room)
-        messagebox.askokcancel("添加主播成功", f"房间Web_Sid: {web_rid} \n 主播名: {name}")
 
     # 添加完房间立刻检查是否开播
     threading.Thread(target=partial(monitor.check_room, room)).start()
@@ -105,6 +102,3 @@ def find_user(info: str):
         room = Room(f"将会在开播时获取{random.randint(1, 100000000)}", nickname, True, True, False, sec_user_id)
         record_manager.rooms.append(room)
         config.save_rooms()
-        if app.win_mode:
-            app.win.add_room(room)
-            messagebox.askokcancel("添加主播成功", f'获取到主播{nickname}，但未开播。将会在开播时获取其直播间链接。')

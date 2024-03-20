@@ -29,9 +29,6 @@ class VideoRecorder:
 
         # 获取成功，清除 cookie failed 记录
         cookie_utils.cookie_failed = 0
-        # GUI
-        if app.win_mode:
-            app.win.set_state(self.room, '正在录制', color='#0000bb')
 
         s = requests.Session()
         s.mount(stream_url, HTTPAdapter(max_retries=3))
@@ -47,41 +44,21 @@ class VideoRecorder:
                 break
             except (requests.exceptions.ReadTimeout, requests.exceptions.ConnectionError):
                 logger.error_and_print(f'{self.room.room_name}({self.room.room_id})直播获取超时，正在重试({retry})')
-        if not os.path.exists('download'):
-            os.mkdir('download')
-        if not os.path.exists(f'download/{self.room.room_name}'):
-            os.mkdir(f'download/{self.room.room_name}')
 
-        with open(filename, 'wb') as file:
-            try:
-                for data in downloading.iter_content(chunk_size=1024):
-                    if data:
-                        file.write(data)
-                        if self.stop_signal:  # 主动停止录制
-                            logger.info_and_print(f'主动停止{self.room.room_name}({self.room.room_id})的录制')
-                            break
-            except requests.exceptions.ConnectionError:
-                # 下载出错(一般是下载超时)，可能是直播已结束，或主播长时间卡顿，先结束录制，然后再检测是否在直播
-                pass
+
+        try:
+            for data in downloading.iter_content(chunk_size=1024):
+                if data:
+                    # file.write(data)
+                    if self.stop_signal:  # 主动停止录制
+                        logger.info_and_print(f'主动停止{self.room.room_name}({self.room.room_id})的录制')
+                        break
+        except requests.exceptions.ConnectionError:
+            # 下载出错(一般是下载超时)，可能是直播已结束，或主播长时间卡顿，先结束录制，然后再检测是否在直播
+            pass
         # 结束录制
         logger.info_and_print(f'{self.room.room_name}({self.room.room_id}) 录制结束')
         plugin.on_live_end(self.room, filename)
-
-        if os.path.exists(filename):
-            file_size = os.stat(filename).st_size
-            # 录制的视频大小为0，删除文件
-            if file_size == 0:
-                os.remove(filename)
-            # 录制到的内容是404，删除文件
-            elif file_size < 1024:
-                with open(filename, 'r', encoding='utf-8') as f:
-                    file_info = str(f.read())
-                if '<head><title>404 Not Found</title></head>' in file_info:
-                    os.remove(filename)
-
-        # GUI
-        if app.win_mode:
-            app.win.set_state(self.room, '未开播', color='#000000')
 
         # 自动转码
         if config.is_auto_transcode():
